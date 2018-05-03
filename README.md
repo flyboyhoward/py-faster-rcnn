@@ -4,7 +4,7 @@ Drone based car detection.
 
 Using CARPK dataset. Dataset details refer to  https://lafi.github.io/LPN/
 
-For training single object dataset, see carpk.py carpk_eval.py factory.py
+For training single object dataset, see carpk.py carpk_eval.py factory.py and CARPK_car folder.
 
 demo.py read video stream from usbcamera
 
