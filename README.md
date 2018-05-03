@@ -1,6 +1,6 @@
-Tools for training, testing, and compressing Fast R-CNN networks.
+Tools for training, testing, and compressing Fast R-CNN networks. Downloaded from https://github.com/rbgirshick/py-faster-rcnn
 
-Drone based car detection.
+This code is modified for drone based car detection, key codes are uploaded in this repository.
 
 Using CARPK dataset. Dataset details refer to  https://lafi.github.io/LPN/
 
