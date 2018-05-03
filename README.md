@@ -11,3 +11,5 @@ demo.py read video stream from usbcamera
 demo2.py read local video and display
 
 demo1.py read local picture
+
+For caffe make, see makefile.config.
