@@ -10,11 +10,11 @@ Using CARPK dataset. Dataset details refer to https://lafi.github.io/LPN/
 
 ## usage
 
-For training on another dataset, see https://github.com/deboc/py-faster-rcnn/tree/master/helpcarpk.py 
+For training on another dataset, see https://github.com/deboc/py-faster-rcnn/tree/master/help
 
 This repository is an example of one object detection. 
 
-In this example, annotations is .txt form document, details refer to carpk_eval.py factory.py and CARPK_car folder.  
+In this example, annotations is .txt form document, details refer to carpk.py carpk_eval.py factory.py and CARPK_car folder.  
 
 ## file explanation 
 
