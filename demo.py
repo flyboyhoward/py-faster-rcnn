@@ -34,6 +34,9 @@ NETS = {'vgg16': ('VGG16',
         'vgg1024': ('VGG_CNN_M_1024',
                     'VGG_CNN_M_1024_faster_rcnn_final.caffemodel')}
 
+flag = 1
+num_car = 0
+
 def vis_detections_video(im, class_name, dets, thresh=0.5):
     """Draw detected bounding boxes."""
     inds = np.where(dets[:, -1] >= thresh)[0]
@@ -43,6 +46,8 @@ def vis_detections_video(im, class_name, dets, thresh=0.5):
     #print car Number
     print(len(inds))
     word = 'number of cars: ' + str(len(inds))
+    global num_car
+    num_car = len(inds)
     cv2.putText(im,word,(980,680),cv2.FONT_HERSHEY_SCRIPT_SIMPLEX,1.0,(120,255,100),2)
 
     for i in inds:
@@ -82,7 +87,33 @@ def demo_video(net,im):
     cv2.imwrite(os.path.join('output',str(time.time())+'.jpg'),im)
     cv2.imshow('ret',im)
 
-    cv2.waitKey(10)
+    global flag
+    if timer.total_time <= 0.1:
+        time_wait = 99 - 1000*timer.total_time
+        print('waittime='+ str(time_wait))
+        cv2.waitKey(int(time_wait))
+    else:
+        pass
+
+    # cv2.imwrite('/home/wwh/Desktop/3.jpg',im)
+
+    if flag == 0:
+        os.rename('/home/wwh/Desktop/1.jpg','/home/wwh/Desktop/0.jpg')
+        cv2.imwrite('/home/wwh/Desktop/1.jpg',im)
+        flag = 1
+
+    if flag == 1:
+        os.rename('/home/wwh/Desktop/3.jpg','/home/wwh/Desktop/2.jpg')
+        cv2.imwrite('/home/wwh/Desktop/3.jpg',im)
+        flag = 0
+    else:
+        pass
+
+    file = open('/home/wwh/Desktop/number.txt','w')
+    file.write(str(num_car))
+    file.close()
+
+    cv2.waitKey(1)
 
 def parse_args():
     """Parse input arguments."""
