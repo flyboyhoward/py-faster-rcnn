@@ -53,7 +53,7 @@ def vis_detections_video(im, class_name, dets, thresh=0.5):
     for i in inds:
         bbox = dets[i, :4]
         score = dets[i, -1]
-        cv2.rectangle(im,(bbox[0],bbox[1]),(bbox[2],bbox[3]),(0,0,255),2)
+        cv2.rectangle(im,(bbox[0],bbox[1]),(bbox[2],bbox[3]),(50,50,255),2)
         #cv2.rectangle(im,(int(bbox[0]),int(bbox[1])-10),(int(bbox[0]+200),int(bbox[1])+10),(10,10,10),-1)
         #cv2.putText(im,'{:s} {:.3f}'.format(class_name, score),(int(bbox[0]),int(bbox[1]-2)),cv2.FONT_HERSHEY_SIMPLEX,.45,(255,255,255))#,cv2.CV_AA)
     return im
@@ -87,33 +87,60 @@ def demo_video(net,im):
     cv2.imwrite(os.path.join('output',str(time.time())+'.jpg'),im)
     cv2.imshow('ret',im)
 
-    global flag
-    if timer.total_time <= 0.1:
-        time_wait = 99 - 1000*timer.total_time
-        print('waittime='+ str(time_wait))
-        cv2.waitKey(int(time_wait))
-    else:
-        pass
+    # if timer.total_time <= 0.1:
+    #     time_wait = 99 - 1000*timer.total_time
+    #     print('waittime='+ str(time_wait))
+    #     cv2.waitKey(int(time_wait))
+    # else:
+    #     pass
 
     # cv2.imwrite('/home/wwh/Desktop/3.jpg',im)
-
-    if flag == 0:
-        os.rename('/home/wwh/Desktop/1.jpg','/home/wwh/Desktop/0.jpg')
-        cv2.imwrite('/home/wwh/Desktop/1.jpg',im)
-        flag = 1
-
-    if flag == 1:
-        os.rename('/home/wwh/Desktop/3.jpg','/home/wwh/Desktop/2.jpg')
-        cv2.imwrite('/home/wwh/Desktop/3.jpg',im)
-        flag = 0
-    else:
-        pass
+    write_picture_file(im)
 
     file = open('/home/wwh/Desktop/number.txt','w')
     file.write(str(num_car))
     file.close()
 
-    cv2.waitKey(1)
+    #cv2.waitKey(1)
+
+def tracking(frame,bbox):
+    # cv2.imshow('ret',frame)
+    # cv2.waitKey(1)
+    timer = cv2.getTickCount()
+    cv2.waitKey(10)
+    # Update tracker
+    ok, bbox = tracker.update(frame)
+
+    # Calculate Frames per second (FPS)
+    fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer);
+    # Draw bounding box
+
+    # Tracking success
+    p1 = (int(bbox[0]), int(bbox[1]))
+    p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
+    cv2.rectangle(frame, p1, p2, (255,0,0), 2, 1)
+    # Display tracker type on frame
+    cv2.putText(frame, 'KCF' + " Tracker", (100,20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50),2);
+    # Display FPS on frame
+    cv2.putText(frame, "FPS : " + str(int(fps)), (100,50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50), 2);
+    # Display result
+    write_picture_file(frame)
+    return bbox
+
+
+def write_picture_file(frame):
+    global flag
+    if flag == 0:
+        os.rename('/home/wwh/Desktop/1.jpg','/home/wwh/Desktop/0.jpg')
+        cv2.imwrite('/home/wwh/Desktop/1.jpg',frame)
+        flag = 1
+
+    if flag == 1:
+        os.rename('/home/wwh/Desktop/3.jpg','/home/wwh/Desktop/2.jpg')
+        cv2.imwrite('/home/wwh/Desktop/3.jpg',frame)
+        flag = 0
+    else:
+        pass
 
 def parse_args():
     """Parse input arguments."""
@@ -154,11 +181,45 @@ if __name__ == '__main__':
 
     print '\n\nLoaded network {:s}'.format(caffemodel)
 
-    #get video from webcam
-    cap = cv2.VideoCapture(1)
+    #init tracking
+    tracker = cv2.TrackerKCF_create()
+    bbox = 1
+    #get video from webcam and set size
+    cap = cv2.VideoCapture(0)
     cap.set(3,1280)
     cap.set(4,720)
 
     while True:
-        ret, frame = cap.read()
-        demo_video(net,frame)
+        ret, image = cap.read()
+
+        file = open('/home/wwh/Desktop/detect_track.txt','r')
+        detect_track = file.read()
+        file.close()
+        print detect_track
+
+        #detect
+        if detect_track  == 'detect\n':
+            demo_video(net,image)
+            bbox = 1
+        #track
+        elif detect_track == 'track\n':
+            print bbox
+            if bbox == 1:
+                print 'please selectROI'
+                bbox = cv2.selectROI(image, False)
+                ok = tracker.init(image, bbox)
+                print 'ROI init success'
+            if bbox != 1:
+                # cv2.imshow('ret',image)
+                cv2.waitKey(1)
+                tracking(image,bbox)
+            # Exit if ESC pressed
+            k = cv2.waitKey(1) & 0xff
+            if k == 27 : break
+        #show iamge only
+        elif detect_track == 'wait\n':
+            write_picture_file(image)
+            # cv2.imshow('ret',image)
+            bbox = 1
+        else:
+            pass
